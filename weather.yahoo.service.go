@@ -20,7 +20,7 @@ func (weatherYahooService *WeatherYahooService) getWeather() (*WeatherReport, er
 		deserializeError = fmt.Errorf("Could not deserialize response")
 	)
 	var (
-		request         *http.Request
+		response        *http.Response
 		err             error
 		output          map[string]interface{}
 		queryObject     map[string]interface{}
@@ -37,9 +37,14 @@ func (weatherYahooService *WeatherYahooService) getWeather() (*WeatherReport, er
 	)
 
 	//Make API Request
-	request, err = http.NewRequest("GET", "https://query.yahooapis.com/v1/public/yql?q=select%20item.condition%2C%20wind%20from%20weather.forecast%20 where%20woeid%20%3D%201105779&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys", nil)
-	jsonDecoder := json.NewDecoder(request.Body)
-	output = make(map[string]interface{})
+	response, err = http.Get("https://query.yahooapis.com/v1/public/yql?q=select%20item.condition%2C%20wind%20from%20weather.forecast%20where%20woeid%20%3D%201105779&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys")
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP Error: %s", response.Status)
+	}
+	jsonDecoder := json.NewDecoder(response.Body)
 	jsonDecoder.Decode(&output)
 
 	//Deserialize the response

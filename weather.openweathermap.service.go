@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type WeatherOpenWeatherMapService struct {
@@ -20,13 +19,11 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		deserializeError = fmt.Errorf("Could not deserialize response")
 	)
 	var (
-		request            *http.Request
+		response           *http.Response
 		err                error
 		output             map[string]interface{}
 		mainObject         map[string]interface{}
 		windObject         map[string]interface{}
-		speedStrValue      string
-		tempStrValue       string
 		speedValue         float64
 		tempFarenheitValue float64
 		tempCelciusValue   float64
@@ -34,8 +31,14 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 	)
 
 	//Make API Request
-	request, err = http.NewRequest("GET", "http://api.openweathermap.org/data/2.5/weather?q=sydney,AU&appid=2326504fb9b100bee21400190e4dbe6d", nil)
-	jsonDecoder := json.NewDecoder(request.Body)
+	response, err = http.Get("http://api.openweathermap.org/data/2.5/weather?q=sydney,AU&appid=2326504fb9b100bee21400190e4dbe6d")
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP Error: %s", response.Status)
+	}
+	jsonDecoder := json.NewDecoder(response.Body)
 	jsonDecoder.Decode(&output)
 
 	//---------------------------------
@@ -47,7 +50,7 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		return nil, deserializeError
 	}
 
-	speedStrValue, ok = windObject["speed"].(string)
+	speedValue, ok = windObject["speed"].(float64)
 	if !ok {
 		return nil, deserializeError
 	}
@@ -61,17 +64,8 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		return nil, deserializeError
 	}
 
-	tempStrValue, ok = mainObject["temp"].(string)
+	tempFarenheitValue, ok = mainObject["temp"].(float64)
 	if !ok {
-		return nil, deserializeError
-	}
-
-	speedValue, err = strconv.ParseFloat(speedStrValue, 32)
-	if err != nil {
-		return nil, deserializeError
-	}
-	tempFarenheitValue, err = strconv.ParseFloat(tempStrValue, 32)
-	if err != nil {
 		return nil, deserializeError
 	}
 
