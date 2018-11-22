@@ -46,7 +46,7 @@ func (v1WeatherController *V1WeatherController) ServeHTTP(w http.ResponseWriter,
 
 	//Upon success, set the output
 	output = V1WeatherControllerGetOutput{
-		WindSpeed:          report.WindSpeed,
+		WindSpeed:          report.WindSpeedMetersPerSecond,
 		TemperatureDegrees: report.TemperatureCelcius,
 	}
 

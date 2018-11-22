@@ -7,15 +7,15 @@ import (
 
 //Raw weather report object that providers interact with
 type WeatherReport struct {
-	WindSpeed          float32
-	TemperatureCelcius float32
+	WindSpeedMetersPerSecond float32
+	TemperatureCelcius       float32
 }
 
 //For cache storage in the report service
 type WeatherReportForCache struct {
-	WindSpeed          float32
-	TemperatureCelcius float32
-	LastDownloaded     time.Time
+	WindSpeedMetersPerSecond float32
+	TemperatureCelcius       float32
+	LastDownloaded           time.Time
 }
 
 type WeatherService struct {
@@ -56,9 +56,9 @@ func (weatherService *WeatherService) getWeatherFromProvider() (*WeatherReportFo
 		return nil, err
 	}
 	return &WeatherReportForCache{
-		LastDownloaded:     time.Now(),
-		WindSpeed:          report.WindSpeed,
-		TemperatureCelcius: report.TemperatureCelcius,
+		LastDownloaded:           time.Now(),
+		WindSpeedMetersPerSecond: report.WindSpeedMetersPerSecond,
+		TemperatureCelcius:       report.TemperatureCelcius,
 	}, nil
 }
 

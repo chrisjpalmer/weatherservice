@@ -16,24 +16,28 @@ func NewWeatherYahooService() *WeatherYahooService {
 }
 
 func (weatherYahooService *WeatherYahooService) getWeather() (*WeatherReport, error) {
+	//FOR TESTING PURPOSES:
+	//return nil, fmt.Errorf("Test break of yahoo service")
 	var (
 		deserializeError = fmt.Errorf("Could not deserialize response")
 	)
 	var (
-		response        *http.Response
-		err             error
-		output          map[string]interface{}
-		queryObject     map[string]interface{}
-		resultsObject   map[string]interface{}
-		channelObject   map[string]interface{}
-		windObject      map[string]interface{}
-		conditionObject map[string]interface{}
-		itemObject      map[string]interface{}
-		speedStrValue   string
-		tempStrValue    string
-		speedValue      float64
-		tempValue       float64
-		ok              bool
+		response            *http.Response
+		err                 error
+		output              map[string]interface{}
+		queryObject         map[string]interface{}
+		resultsObject       map[string]interface{}
+		channelObject       map[string]interface{}
+		windObject          map[string]interface{}
+		conditionObject     map[string]interface{}
+		itemObject          map[string]interface{}
+		speedStrValue       string
+		tempStrValue        string
+		speedMphValue       float64 //miles per hour
+		speedMpsValue       float64 //meters per second
+		tempFahrenheitValue float64
+		tempCelciusValue    float64
+		ok                  bool
 	)
 
 	//Make API Request
@@ -96,17 +100,22 @@ func (weatherYahooService *WeatherYahooService) getWeather() (*WeatherReport, er
 		return nil, deserializeError
 	}
 
-	speedValue, err = strconv.ParseFloat(speedStrValue, 32)
-	if err != nil {
-		return nil, deserializeError
-	}
-	tempValue, err = strconv.ParseFloat(tempStrValue, 32)
+	speedMphValue, err = strconv.ParseFloat(speedStrValue, 32)
 	if err != nil {
 		return nil, deserializeError
 	}
 
+	speedMpsValue = speedMphValue * 0.44704
+
+	tempFahrenheitValue, err = strconv.ParseFloat(tempStrValue, 32)
+	if err != nil {
+		return nil, deserializeError
+	}
+
+	tempCelciusValue = (tempFahrenheitValue - 32.0) * (5.0 / 9.0)
+
 	return &WeatherReport{
-		WindSpeed:          float32(speedValue),
-		TemperatureCelcius: float32(tempValue),
+		WindSpeedMetersPerSecond: float32(speedMpsValue),
+		TemperatureCelcius:       float32(tempCelciusValue),
 	}, nil
 }

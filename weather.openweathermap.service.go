@@ -19,15 +19,15 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		deserializeError = fmt.Errorf("Could not deserialize response")
 	)
 	var (
-		response           *http.Response
-		err                error
-		output             map[string]interface{}
-		mainObject         map[string]interface{}
-		windObject         map[string]interface{}
-		speedValue         float64
-		tempFarenheitValue float64
-		tempCelciusValue   float64
-		ok                 bool
+		response         *http.Response
+		err              error
+		output           map[string]interface{}
+		mainObject       map[string]interface{}
+		windObject       map[string]interface{}
+		speedMpsValue    float64
+		tempKelvinValue  float64
+		tempCelciusValue float64
+		ok               bool
 	)
 
 	//Make API Request
@@ -50,7 +50,7 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		return nil, deserializeError
 	}
 
-	speedValue, ok = windObject["speed"].(float64)
+	speedMpsValue, ok = windObject["speed"].(float64)
 	if !ok {
 		return nil, deserializeError
 	}
@@ -64,16 +64,16 @@ func (weatherOpenWeatherMapService *WeatherOpenWeatherMapService) getWeather() (
 		return nil, deserializeError
 	}
 
-	tempFarenheitValue, ok = mainObject["temp"].(float64)
+	tempKelvinValue, ok = mainObject["temp"].(float64)
 	if !ok {
 		return nil, deserializeError
 	}
 
 	//Convert the temperature to celcius as this service provides it in farenheit
-	tempCelciusValue = (tempFarenheitValue - 32.0) * (5.0 / 9.0)
+	tempCelciusValue = (tempKelvinValue - 273.15)
 
 	return &WeatherReport{
-		WindSpeed:          float32(speedValue),
-		TemperatureCelcius: float32(tempCelciusValue),
+		WindSpeedMetersPerSecond: float32(speedMpsValue),
+		TemperatureCelcius:       float32(tempCelciusValue),
 	}, nil
 }
